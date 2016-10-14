@@ -1,2 +1,2 @@
 # Calculator
-The title should speak for itself ;)
+Creating a calculator using ANTLR4
