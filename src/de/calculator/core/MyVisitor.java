@@ -10,7 +10,10 @@ public class MyVisitor extends CalculatorBaseVisitor<String> {
     public String visitEval(CalculatorParser.EvalContext ctx) {
         visitChildren(ctx);
         if (ctx.getChildCount() == 1)
+        {
             System.out.println(ctx.getChild(0));
+            System.out.println("ctx.getChildCount() == 1");
+        }
         else {
             System.out.println(ctx.getChild(2));
             System.out.println("Eval");

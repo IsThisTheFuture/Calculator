@@ -40,7 +40,7 @@ atomExp
     ;
 
 
-/* Eine Zahl: kann einen Integer Wert, oder eine Dezimalzahl sein */
+/* Eine Zahl: kann entweder ein Integer, oder eine Dezimalzahl sein */
 Number
     :    ('0'..'9')+ ('.' ('0'..'9')+)?
     ;
