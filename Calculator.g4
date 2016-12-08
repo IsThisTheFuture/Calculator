@@ -1,52 +1,57 @@
-/* Im Folgenden ist eine einfache Grammatik definiert, welche die Grundrechenarten (+, -, *, /)
-   sowie die Verwendung von Klammern erlaubt.
-   Die aktuelle Version erlaubt allerdings noch keine Verwendung von unären Operatoren
-   z.B. würde '-9 + 5' einen Fehler produzieren.
-
-   Parserreglen starten mit Kleinbuchstaben, Lexerregeln mit Großbuchstaben */
-
-
 grammar Calculator;
+INT    : [0-9]+;
+DOUBLE : [0-9]+'.'[0-9]+;
+PI     : 'pi';
+E      : 'e';
+POW    : '^';
+NL     : '\n';
+WS     : [ \t\r]+ -> skip;
+ID     : [a-zA-Z_][a-zA-Z_0-9]*;
 
-/* Startregel für den Parser */
-eval
-    :    additionExp
+PLUS  : '+';
+EQUAL : '=';
+MINUS : '-';
+MULT  : '*';
+DIV   : '/';
+LPAR  : '(';
+RPAR  : ')';
+
+input
+    : setVar NL input     # ToSetVar
+    | plusOrMinus NL? EOF # Calculate
     ;
 
-/* Addition und Subtraktion haben den geringsten Vorrang.
-   Die Reihenfolge in der die Regeln definiert werden haben also Einfluss auf den Vorrang. */
-additionExp
-    :    multiplyExp
-         ( '+' multiplyExp
-         | '-' multiplyExp
-         )*
-    ;
-
-/* Multiplikation und Division besitzen größeren Vorrang */
-multiplyExp
-    :    atomExp
-         ( '*' atomExp
-         | '/' atomExp
-         )*
-    ;
-
-
-/* Ein Expression Atom ist der kleinste Teil eines Ausdrucks: eine Zahl. Oder
-   wenn wir auf Klammern treffen rufen wir die Regel 'additionExp' rekursiv auf.
-   Wie man sieht besitzt eine 'atomExp' den größten Vorrang. */
-atomExp
-    :    Number
-    |    '(' additionExp ')'
+setVar
+    : ID EQUAL plusOrMinus # SetVariable
     ;
 
 
-/* Eine Zahl: kann entweder ein Integer, oder eine Dezimalzahl sein */
-Number
-    :    ('0'..'9')+ ('.' ('0'..'9')+)?
+plusOrMinus
+    : plusOrMinus PLUS multOrDiv  # Plus
+    | plusOrMinus MINUS multOrDiv # Minus
+    | multOrDiv                   # ToMultOrDiv
     ;
 
-/* Sämtliche Whitespaces sollen ignoriert werden
-   Prüfen: https://stackoverflow.com/questions/15503561/antlr4-whitespace-handling */
-WS
-    :   (' ' | '\t' | '\r'| '\n') -> skip
+multOrDiv
+    : multOrDiv MULT pow # Multiplication
+    | multOrDiv DIV pow  # Division
+    | pow                # ToPow
+    ;
+
+pow
+    : unaryMinus (POW pow)? # Power
+    ;
+
+unaryMinus
+    : MINUS unaryMinus # ChangeSign
+    | atom             # ToAtom
+    ;
+
+atom
+    : PI                    # ConstantPI
+    | E                     # ConstantE
+    | DOUBLE                # Double
+    | INT                   # Int
+    | ID                    # Variable
+    | LPAR plusOrMinus RPAR # Braces
     ;
